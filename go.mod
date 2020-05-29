@@ -8,7 +8,6 @@ replace (
 )
 
 require (
-	github.com/Percona-Lab/clickhouse_exporter v0.1.0 // indirect
 	github.com/Sirupsen/logrus v1.6.0 // indirect
 	github.com/prometheus/client_golang v1.6.0
 	github.com/prometheus/log v0.0.0-20151026012452-9a3136781e1f

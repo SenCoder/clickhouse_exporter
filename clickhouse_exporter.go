@@ -1,12 +1,13 @@
-package main // import "github.com/Percona-Lab/clickhouse_exporter"
+package main
 
 import (
 	"flag"
+	"github.com/SenCoder/clickhouse_exporter/exporter"
+
 	"net/http"
 	"net/url"
 	"os"
 
-	"clickhouse_exporter/exporter"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/log"
