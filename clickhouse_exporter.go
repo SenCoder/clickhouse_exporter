@@ -14,12 +14,13 @@ import (
 )
 
 var (
-	listeningAddress    = flag.String("telemetry.address", ":9116", "Address on which to expose metrics.")
-	metricsEndpoint     = flag.String("telemetry.endpoint", "/metrics", "Path under which to expose metrics.")
-	clickhouseScrapeURI = flag.String("scrape_uri", "http://localhost:8123/", "URI to clickhouse http endpoint")
-	insecure            = flag.Bool("insecure", true, "Ignore server certificate if using https")
-	user                = os.Getenv("CLICKHOUSE_USER")
-	password            = os.Getenv("CLICKHOUSE_PASSWORD")
+	listeningAddress     = flag.String("telemetry.address", ":9116", "Address on which to expose metrics.")
+	metricsEndpoint      = flag.String("telemetry.endpoint", "/metrics", "Path under which to expose metrics.")
+	clickhouseScrapeURI  = flag.String("scrape.uri", "http://localhost:8123/", "URI to clickhouse http endpoint")
+	clickhouseMetricsOly = flag.Bool("ck.metrics.only", true, "Where to expose clickhouse metrics only")
+	insecure             = flag.Bool("insecure", true, "Ignore server certificate if using https")
+	user                 = os.Getenv("CLICKHOUSE_USER")
+	password             = os.Getenv("CLICKHOUSE_PASSWORD")
 )
 
 func main() {
@@ -30,9 +31,17 @@ func main() {
 		log.Fatal(err)
 	}
 	e := exporter.NewExporter(*uri, *insecure, user, password)
-	prometheus.MustRegister(e)
 
-	log.Printf("Starting Server: %s", *listeningAddress)
+	var registry prometheus.Registerer
+	if *clickhouseMetricsOly {
+		registry = prometheus.DefaultRegisterer
+	} else {
+		registry = prometheus.NewRegistry()
+	}
+
+	registry.MustRegister(e)
+
+	log.Infof("Starting Server: %s", *listeningAddress)
 	http.Handle(*metricsEndpoint, promhttp.Handler())
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`<html>
